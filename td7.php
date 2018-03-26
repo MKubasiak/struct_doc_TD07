@@ -2,9 +2,6 @@
 
 class td7{
 
-
-
-
     public function getHtml($url){
 
         // initialisation de la session
@@ -38,7 +35,7 @@ class td7{
         $domdoc->preserveWhiteSpace = false;
 
         $xpath = new DOMXPath($domdoc);
-        $query = '//book/chapter/para/informaltable/tgroup/tbody/row/entry[. = "en"]';
+        $query = '/html/body/div[4]/div[2]/section[1]/article/div/header/h2/a';
         $entries = $xpath->query($query);
         return $entries;
     }
