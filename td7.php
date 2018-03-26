@@ -33,9 +33,16 @@ class td7{
 
     public function getUrls($domdoc){
         $domdoc->preserveWhiteSpace = false;
-
         $xpath = new DOMXPath($domdoc);
-        $query = "/html/body/div[4]/div[2]/section[1]//a/@href";
+        $query = "/html/body/div[4]/div[2]/section[1]/article//a/@href";
+        $entries = $xpath->query($query);
+        return $entries;
+    }
+
+    public function getComments($domdoc){
+        $domdoc->preserveWhiteSpace = false;
+        $xpath = new DOMXPath($domdoc);
+        $query = "//span[class='ob-text']";
         $entries = $xpath->query($query);
         return $entries;
     }
@@ -47,7 +54,14 @@ $html = $td7->getHtml("http://www.grelinettecassolettes.com/");
 $dom = $td7->htmlToTree($html);
 $urls = $td7->getUrls($dom);
 foreach ($urls as $entry) {
-    echo "node value {$entry->nodeValue}\n";
+        $html = $td7->getHtml($entry->nodeValue);
+        $domdoc2 = $td7->htmlToTree($html);
+        $comments = $td7->getComments($domdoc2);
+        foreach($comments as $comment){
+            echo "commentaire : {$comment->nodeValue}\n";
+        }
+
+
 }
 
 
