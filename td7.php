@@ -2,6 +2,17 @@
 
 class td7{
 
+    private $QUERY_TITLE = "/article/header/h1[@class='post-title']";
+    private $QUERY_NAME = "//div[@class='ob-comment']/p[@class='ob-info']/span[@class='ob-name']/a";
+    private $QUERY_DATE = "//div[@class='ob-comment']/p[@class='ob-info']/span[@class='ob-date']";
+    private $QUERY_COMMENT = "//div[@class='ob-comment']";
+
+    public $tab_title = array();
+    public $tab_name = array();
+    public $tab_date = array();
+    public $tab_comment = array();
+
+
     public function getHtml($url){
 
         // initialisation de la session
@@ -39,12 +50,44 @@ class td7{
         return $entries;
     }
 
+    public function getTitle($domdoc){
+        $domdoc->preserveWhiteSpace = false;
+        $xpath = new DOMXPath($domdoc);
+        $query = self::QUERY_TITLE;
+        $entries = $xpath->query($query);
+        foreach($entries as $entry){
+            array_push($tab_title, $entry);
+        }
+    }
+
+    public function getName($domdoc){
+        $domdoc->preserveWhiteSpace = false;
+        $xpath = new DOMXPath($domdoc);
+        $query = self::QUERY_NAME;
+        $entries = $xpath->query($query);
+        foreach($entries as $entry){
+            array_push($tab_name, $entry);
+        }
+    }
+
+    public function getDate($domdoc){
+        $domdoc->preserveWhiteSpace = false;
+        $xpath = new DOMXPath($domdoc);
+        $query = self::QUERY_DATE;
+        $entries = $xpath->query($query);
+        foreach($entries as $entry){
+            array_push($tab_date, $entry);
+        }
+    }
+
     public function getComments($domdoc){
         $domdoc->preserveWhiteSpace = false;
         $xpath = new DOMXPath($domdoc);
-        $query = "//div[class='ob-comment']";
+        $query = self::QUERY_COMMENT;
         $entries = $xpath->query($query);
-        return $entries;
+        foreach($entries as $entry){
+            array_push($tab_comment, $entry);
+        }
     }
 
 }
