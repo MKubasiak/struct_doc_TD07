@@ -42,7 +42,7 @@ class td7{
     public function getComments($domdoc){
         $domdoc->preserveWhiteSpace = false;
         $xpath = new DOMXPath($domdoc);
-        $query = "//span[contains(@class, 'ob-text')]";
+        $query = "//div[class='ob-comment']";
         $entries = $xpath->query($query);
         return $entries;
     }
