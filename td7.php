@@ -14,9 +14,9 @@ class td7{
 
 
         // configuration des options
-        curl_setopt($ch, CURLOPT_URL, "http://www.grelinettecassolettes.com/");
+        curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_USERAGENT, $userAgent);
-
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         // exécution de la session
         $page = curl_exec($ch);
 
@@ -26,7 +26,29 @@ class td7{
 
     }
 
+    public function htmlToTree($html){
+        $doc = new DOMDocument();
+        libxml_use_internal_errors(true);
+        $doc->loadHTML($html);
+        $doc->saveHTML();
+        return $doc;
+    }
+
+    public function getUrls($domdoc){
+        $domdoc->preserveWhiteSpace = false;
+
+        $xpath = new DOMXPath($domdoc);
+        $query = '//book/chapter/para/informaltable/tgroup/tbody/row/entry[. = "en"]';
+        $entries = $xpath->query($query);
+        return $entries;
+    }
+
 }
+
+$td7 = new td7();
+$html = $td7->getHtml("http://www.grelinettecassolettes.com/");
+$dom = $td7->htmlToTree($html);
+
 
 
 
