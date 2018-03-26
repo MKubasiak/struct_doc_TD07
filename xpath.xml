@@ -1,0 +1,7 @@
+//div[@class='ob-comment']/p[@class='ob-info']/span[@class='ob-user']/span[@class='ob-name']/a,
+
+//div[@class='ob-comment']/p[@class='ob-info']/span[@class='ob-user']/span[@class='ob-date'],
+
+//article/header/h1[@class='post-title'],
+
+//div[@class='ob-comment']/p[@class="ob-message"]/span[@class='ob-text']
