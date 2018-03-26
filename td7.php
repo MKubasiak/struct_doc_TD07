@@ -35,7 +35,7 @@ class td7{
         $domdoc->preserveWhiteSpace = false;
 
         $xpath = new DOMXPath($domdoc);
-        $query = '/html/body/div[4]/div[2]/section[1]/article/div/header/h2/a';
+        $query = "/html/body/div[4]/div[2]/section[1]//a/@href";
         $entries = $xpath->query($query);
         return $entries;
     }
@@ -45,7 +45,10 @@ class td7{
 $td7 = new td7();
 $html = $td7->getHtml("http://www.grelinettecassolettes.com/");
 $dom = $td7->htmlToTree($html);
-
+$urls = $td7->getUrls($dom);
+foreach ($urls as $entry) {
+    echo "node value {$entry->nodeValue}\n";
+}
 
 
 
