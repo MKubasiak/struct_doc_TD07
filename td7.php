@@ -5,8 +5,8 @@ class td7{
     private $QUERY_TITLE    =   "//article/header/h1[@class='post-title']";
     private $QUERY_NAME     =   "//div[@class='ob-comment']/p[@class='ob-info']/span[@class='ob-user']/span[@class='ob-name']/a";
     private $QUERY_DATE     =   "//div[@class='ob-comment']/p[@class='ob-info']/span[@class='ob-user']/span[@class='ob-date']";
-    private $QUERY_COMMENT  =   "//div[@class='ob-comment']";
-    private $QUERY_URLS     =   "/html/body/div[4]/div[2]/section[1]/article/div/header//a/@href";
+    private $QUERY_COMMENT  =   "//div[@class='ob-comment']/p[@class=\"ob-message\"]/span[@class='ob-text']";
+    private $QUERY_URLS     =   "//h2[@class='post-title']/a/@href";
     public $i;
 
     //on stocke pour chacun des commentaires le titre/le nom/ la date/ le commentaire et l'url. On sait que on gardera l'ordre des commenaires dans les tableaux.
@@ -181,6 +181,7 @@ foreach ($urls as $entry) {
     for($j=0;$j<=$td7->i;$j++){
         $td7->setTabArticleLink($entry->nodeValue);
     }
+
 }
 
 echo $td7->generateRss();
