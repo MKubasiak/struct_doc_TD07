@@ -3,19 +3,11 @@
 class td7{
 
     private $QUERY_TITLE    =   "//article/header/h1[@class='post-title']";
-    private $QUERY_NAME     =   "//div[@class='ob-comment']/p[@class='ob-info']/span[@class='ob-user']/span[@class='ob-name']/a";
-    private $QUERY_DATE     =   "//div[@class='ob-comment']/p[@class='ob-info']/span[@class='ob-user']/span[@class='ob-date']";
-    private $QUERY_COMMENT  =   "//div[@class='ob-comment']/p[@class=\"ob-message\"]/span[@class='ob-text']";
+    private $QUERY_NAME     =   "//p[@class='ob-info']/span[@class='ob-user']/span[@class='ob-name']";
+    private $QUERY_DATE     =   "//p[@class='ob-info']/span[@class='ob-user']/span[@class='ob-date']";
+    private $QUERY_CONTENT  =   "//p[@class='ob-message']/span[@class='ob-text']";
+    private $QUERY_COMMENT  =   "//div[@class='ob-comment']";
     private $QUERY_URLS     =   "//h2[@class='post-title']/a/@href";
-    public $i;
-
-    //on stocke pour chacun des commentaires le titre/le nom/ la date/ le commentaire et l'url. On sait que on gardera l'ordre des commenaires dans les tableaux.
-    public $tab_title           =   array();
-    public $tab_name            =   array();
-    public $tab_date            =   array();
-    public $tab_comment         =   array();
-    public $tab_article_link    =   array();
-
 
     /**
      * Get HTML from link
@@ -28,7 +20,6 @@ class td7{
         $ch = curl_init();
 
         $userAgent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/525.13 (KHTML, like Gecko) Chrome/0.A.B.C Safari/525.13';
-
 
         // configuration des options
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -69,65 +60,9 @@ class td7{
     }
 
     /**
-     * Get article title
-     * @param $domdoc
+     * Create the header of the RSS
+     * @return string
      */
-    public function getTitle($domdoc){
-        $domdoc->preserveWhiteSpace = false;
-        $xpath = new DOMXPath($domdoc);
-        $entries = $xpath->query($this->QUERY_TITLE);
-        foreach($entries as $entry){
-            array_push($this->tab_title, $entry->nodeValue);
-        }
-    }
-
-    /**
-     * Get names from comments
-     * @param $domdoc
-     */
-    public function getName($domdoc){
-        $domdoc->preserveWhiteSpace = false;
-        $xpath = new DOMXPath($domdoc);
-        $entries = $xpath->query($this->QUERY_NAME);
-     //   var_dump($entries);
-        $this->i = 0;
-        foreach($entries as $entry){
-            array_push($this->tab_name, $entry->nodeValue);
-            $this->i++;
-        }
-    }
-
-    /**
-     * Get dates from comments
-     * @param $domdoc
-     */
-    public function getDate($domdoc){
-        $domdoc->preserveWhiteSpace = false;
-        $xpath = new DOMXPath($domdoc);
-        $entries = $xpath->query($this->QUERY_DATE);
-        foreach($entries as $entry){
-            array_push($this->tab_date, $entry->nodeValue);
-        }
-    }
-
-    /**
-     * Get texts from comments
-     * @param $domdoc
-     */
-    public function getComments($domdoc){
-        $domdoc->preserveWhiteSpace = false;
-        $xpath = new DOMXPath($domdoc);
-        $entries = $xpath->query($this->QUERY_COMMENT);
-        foreach($entries as $entry){
-            array_push($this->tab_comment, $entry->nodeValue);
-        }
-    }
-
-    public function setTabArticleLink($val){
-        array_push($this->tab_article_link, $val->nodeValue);
-    }
-
-
     public function headerRss(){
         $rssfeed = '<?xml version="1.0" encoding="UTF-8"?>';
         $rssfeed .= '<rss version="2.0">';
@@ -138,53 +73,83 @@ class td7{
         return $rssfeed;
     }
 
-    public function formatComment($index){
+    /**
+     * Create the content of the RSS
+     * @param $title
+     * @param $content
+     * @param $url
+     * @param $author
+     * @param $date
+     * @return string
+     */
+    public function formatComment($title, $content, $url, $author, $date){
         $rssfeed    = '<item>';
-        $rssfeed    .= '<title>' . $this->tab_title[$index] . '</title>';
-        $rssfeed    .= '<description>' . $this->tab_comment[$index] . '</description>';
-        $rssfeed    .= '<link>' . $this->tab_article_link[$index] . '</link>';
-        $rssfeed    .= '<author>' . $this->tab_name[$index] . '</author>';
-        $rssfeed    .= '<pubDate>' . $this->tab_date[$index] . '</pubDate>';
+        $rssfeed    .= '<title>' . $title . '</title>';
+        $rssfeed    .= '<description>' . $content . '</description>';
+        $rssfeed    .= '<link>' . $url . '</link>';
+        $rssfeed    .= '<author>' . $author . '</author>';
+        $rssfeed    .= '<pubDate>' . $date . '</pubDate>';
         $rssfeed    .= '</item>';
         return $rssfeed;
     }
 
+    /**
+     * Create the footer of the RSS
+     * @return string
+     */
     public function footerRss(){
         $rssfeed = '</channel>';
         $rssfeed .= '</rss>';
         return $rssfeed;
     }
 
+    /**
+     * Generate the RSS
+     */
     public function generateRss(){
         $rssFeed = $this->headerRss();
-        for($i = 0; $i<=count($this->tab_date);$i++){
-            $rssFeed .= $this->formatComment($i);
-        }
+        $rssFeed .= $this->getData();
         $rssFeed .= $this->footerRss();
-        return $rssFeed;
+        $fp = fopen("fluxRss.xml", 'w+');
+        fputs($fp, $rssFeed);
+        fclose($fp);
     }
 
+    /**
+     * Get data from DOMtree
+     * @return string
+     */
+    public function getData(){
+        $html = $this->getHtml("http://www.grelinettecassolettes.com/");
+        $dom = $this->htmlToTree($html);
+        $urls = $this->getUrls($dom);
+        $rssFeed="";
+        foreach ($urls as $entry) {
+            $html2 = $this->getHtml($entry->nodeValue);
+            $domdoc = $this->htmlToTree($html2);
+
+            $xpath = new DOMXPath($domdoc);
+            $entries = $xpath->query($this->QUERY_COMMENT);
+            $i=0;
+
+            if($entries->length > 0) {
+                foreach ($entries as $comment) {
+                    $title = $xpath->query($this->QUERY_TITLE)->item(0)->nodeValue;
+                    $url = $entry->nodeValue;
+                    $content = $xpath->query($this->QUERY_CONTENT, $comment)->item($i)->nodeValue;
+                    $author = $xpath->query($this->QUERY_NAME, $comment)->item($i)->nodeValue;
+                    $date = $xpath->query($this->QUERY_DATE, $comment)->item($i)->nodeValue;
+                    $rssFeed.=$this->formatComment($title, $content, $url, $author, $date);
+                    $i++;
+                }
+            }
+        }
+        return $rssFeed;
+    }
 }
 
 $td7 = new td7();
-$html = $td7->getHtml("http://www.grelinettecassolettes.com/");
-$dom = $td7->htmlToTree($html);
-$urls = $td7->getUrls($dom);
-foreach ($urls as $entry) {
-    //on sait que l'url de l'article correspondant au commentaire est $entry->nodeValue
-    $html2 = $td7->getHtml($entry->nodeValue);
-    $domdoc2 = $td7->htmlToTree($html2);
-    $td7->getName($domdoc2);
-    $td7->getComments($domdoc2);
-    $td7->getDate($domdoc2);
-    $td7->getTitle($domdoc2);
-    for($j=0;$j<=$td7->i;$j++){
-        $td7->setTabArticleLink($entry->nodeValue);
-    }
-
-}
-
-echo $td7->generateRss();
+$td7->generateRss();
 
 
 
