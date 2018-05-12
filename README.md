@@ -10,7 +10,7 @@ Nous avons choisi le site : http://www.grelinettecassolettes.com/
 
 Chaque article est composé de 0 ou plusieurs commentaires, l'objectif de l'application est de **créer un flux RSS** avec tous les commentaires de chaque article.
 
-Vous retrouverez sur le fichier **flux.xml** pour chacun des commentaires:
+Vous retrouverez sur le fichier **fluxRss.xml** pour chacun des commentaires:
 - Son auteur
 - Sa date
 - Son contenu
